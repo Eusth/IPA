@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>IllusionPlugin</name>
+    </assembly>
+    <members>
+        <member name="P:IllusionPlugin.IEnhancedPlugin.Filter">
+            <summary>
+            Gets a list of executables this plugin should be excuted on (without the file ending)
+            </summary>
+            <example>{ "PlayClub", "PlayClubStudio" }</example>
+        </member>
+        <member name="T:IllusionPlugin.IniFile">
+            <summary>
+            Create a New INI file to store or load data
+            </summary>
+        </member>
+        <member name="M:IllusionPlugin.IniFile.#ctor(System.String)">
+            <summary>
+            INIFile Constructor.
+            </summary>
+            <PARAM name="INIPath"></PARAM>
+        </member>
+        <member name="M:IllusionPlugin.IniFile.IniWriteValue(System.String,System.String,System.String)">
+            <summary>
+            Write Data to the INI File
+            </summary>
+            <PARAM name="Section"></PARAM>
+            Section name
+            <PARAM name="Key"></PARAM>
+            Key Name
+            <PARAM name="Value"></PARAM>
+            Value Name
+        </member>
+        <member name="M:IllusionPlugin.IniFile.IniReadValue(System.String,System.String)">
+            <summary>
+            Read Data Value From the Ini File
+            </summary>
+            <PARAM name="Section"></PARAM>
+            <PARAM name="Key"></PARAM>
+            <PARAM name="Path"></PARAM>
+            <returns></returns>
+        </member>
+        <member name="T:IllusionPlugin.IPlugin">
+            <summary>
+            Interface for generic Illusion unity plugins. Every class that implements this will be loaded if the DLL is placed at
+            data/Managed/Plugins.
+            </summary>
+        </member>
+        <member name="P:IllusionPlugin.IPlugin.Name">
+            <summary>
+            Gets the name of the plugin.
+            </summary>
+        </member>
+        <member name="P:IllusionPlugin.IPlugin.Version">
+            <summary>
+            Gets the version of the plugin.
+            </summary>
+        </member>
+        <member name="M:IllusionPlugin.IPlugin.OnApplicationStart">
+            <summary>
+            Gets invoked when the application is started.
+            </summary>
+        </member>
+        <member name="M:IllusionPlugin.IPlugin.OnApplicationQuit">
+            <summary>
+            Gets invoked when the application is closed.
+            </summary>
+        </member>
+        <member name="M:IllusionPlugin.IPlugin.OnLevelWasLoaded(System.Int32)">
+            <summary>
+            Gets invoked whenever a level is loaded.
+            </summary>
+            <param name="level"></param>
+        </member>
+        <member name="M:IllusionPlugin.IPlugin.OnLevelWasInitialized(System.Int32)">
+            <summary>
+            Gets invoked after the first update cycle after a level was loaded.
+            </summary>
+            <param name="level"></param>
+        </member>
+        <member name="M:IllusionPlugin.IPlugin.OnUpdate">
+            <summary>
+            Gets invoked on every graphic update.
+            </summary>
+        </member>
+        <member name="M:IllusionPlugin.IPlugin.OnFixedUpdate">
+            <summary>
+            Gets invoked on ever physics update.
+            </summary>
+        </member>
+        <member name="T:IllusionPlugin.ModPrefs">
+            <summary>
+            Allows to get and set preferences for your mod. 
+            </summary>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.GetString(System.String,System.String,System.String,System.Boolean)">
+            <summary>
+            Gets a string from the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <param name="defaultValue">Value that should be used when no value is found.</param>
+            <param name="autoSave">Whether or not the default value should be written if no value is found.</param>
+            <returns></returns>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.GetInt(System.String,System.String,System.Int32,System.Boolean)">
+            <summary>
+            Gets an int from the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <param name="defaultValue">Value that should be used when no value is found.</param>
+            <param name="autoSave">Whether or not the default value should be written if no value is found.</param>
+            <returns></returns>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.GetFloat(System.String,System.String,System.Single,System.Boolean)">
+            <summary>
+            Gets a float from the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <param name="defaultValue">Value that should be used when no value is found.</param>
+            <param name="autoSave">Whether or not the default value should be written if no value is found.</param>
+            <returns></returns>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.GetBool(System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Gets a bool from the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <param name="defaultValue">Value that should be used when no value is found.</param>
+            <param name="autoSave">Whether or not the default value should be written if no value is found.</param>
+            <returns></returns>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.HasKey(System.String,System.String)">
+            <summary>
+            Checks whether or not a key exists in the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <returns></returns>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.SetFloat(System.String,System.String,System.Single)">
+            <summary>
+            Sets a float in the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <param name="value">Value that should be written.</param>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.SetInt(System.String,System.String,System.Int32)">
+            <summary>
+            Sets an int in the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <param name="value">Value that should be written.</param>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.SetString(System.String,System.String,System.String)">
+            <summary>
+            Sets a string in the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <param name="value">Value that should be written.</param>
+        </member>
+        <member name="M:IllusionPlugin.ModPrefs.SetBool(System.String,System.String,System.Boolean)">
+            <summary>
+            Sets a bool in the ini.
+            </summary>
+            <param name="section">Section of the key.</param>
+            <param name="name">Name of the key.</param>
+            <param name="value">Value that should be written.</param>
+        </member>
+    </members>
+</doc>
