@@ -10,6 +10,10 @@ namespace IllusionInjector
     {
         public event Action Destroyed = delegate {};
 
+        void Start()
+        {
+            Destroy(gameObject);
+        }
         void OnDestroy()
         {
             Destroyed();
