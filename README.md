@@ -17,6 +17,8 @@ Illusion Plugin Architecture (Reloaded)
 
 ## How To Keep The Game Patched
 
+If you don't want to drag & drop the game exe onto IPA.exe everytime you replace CSharp-Assembly.dll, do this:
+
 1. Copy the file **Launcher.exe** from the **IPA** folder into your game folder
 2. Name it like the game exe but append "_Patched" (e.g. **Game.exe** -> **Game_Patched.exe**)
 3. Always start the game with the "_Patched" exe
