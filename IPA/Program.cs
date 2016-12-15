@@ -94,7 +94,8 @@ namespace IPA
             Console.Error.Write("ERROR: " + message);
             if (!Environment.CommandLine.Contains("--nowait"))
             {
-                Console.In.ReadToEnd();
+                Console.WriteLine("\n\n[Press any key to quit]");
+                Console.ReadKey();
             }
             Environment.Exit(1);
         }
