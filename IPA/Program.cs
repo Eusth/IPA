@@ -20,7 +20,7 @@ namespace IPA
             string managedFolder = Path.Combine("IPA", "Managed");
             string pluginsFolder = "Plugins";
             string projectName = Path.GetFileNameWithoutExtension(args[0]);
-            string dataPath = Path.Combine(Path.Combine(Environment.CurrentDirectory, projectName + "_Data"), "Managed");
+            string dataPath = Path.Combine(Path.Combine(Path.GetDirectoryName(args[0]), projectName + "_Data"), "Managed");
             string engineFile = Path.Combine(dataPath, "UnityEngine.dll");
             string assemblyFile = Path.Combine(dataPath, "Assembly-Csharp.dll");
 
@@ -35,11 +35,13 @@ namespace IPA
             try
             {
                 // Copying
+                Console.Write("Updating files... ");
                 CopyAll(new DirectoryInfo(managedFolder), new DirectoryInfo(dataPath));
-                Console.WriteLine("Successfully copied files!");
+                Console.WriteLine("Successfully updated files!");
 
-                if(!Directory.Exists(pluginsFolder))
+                if (!Directory.Exists(pluginsFolder))
                 {
+                    Console.WriteLine("Creating plugins folder... ");
                     Directory.CreateDirectory(pluginsFolder);
                 }
 
@@ -47,21 +49,27 @@ namespace IPA
                 var patchedModule = PatchedModule.Load(engineFile);
                 if(!patchedModule.IsPatched)
                 {
+                    Console.Write("Patching UnityEngine.dll... ");
                     BackupManager.MakeBackup(engineFile);
                     patchedModule.Patch();
+                    Console.WriteLine("Done!");
                 }
 
                 // Virtualizing
                 var virtualizedModule = VirtualizedModule.Load(assemblyFile);
                 if(!virtualizedModule.IsVirtualized)
                 {
+                    Console.Write("Virtualizing Assembly-Csharp.dll... ");
                     BackupManager.MakeBackup(assemblyFile);
                     virtualizedModule.Virtualize();
+                    Console.WriteLine("Done!");
                 }
             } catch(Exception e)
             {
                 Fail("Oops! This should not have happened.\n\n" + e);
             }
+
+            Console.WriteLine("Finished!");
         }
 
         public static void CopyAll(DirectoryInfo source, DirectoryInfo target)

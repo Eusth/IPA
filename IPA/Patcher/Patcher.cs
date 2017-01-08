@@ -10,7 +10,7 @@ namespace IPA.Patcher
 {
     class PatchedModule
     {
-        private const string ENTRY_TYPE = "Display";
+        private static readonly string[] ENTRY_TYPES = { "Input", "Display" };
 
         private FileInfo _File;
         private ModuleDefinition _Module;
@@ -57,29 +57,43 @@ namespace IPA.Patcher
             // First, let's add the reference
             var nameReference = new AssemblyNameReference("IllusionInjector", new Version(1, 0, 0, 0));
             var injectorPath = Path.Combine(_File.DirectoryName, "IllusionInjector.dll");
+            var injector = ModuleDefinition.ReadModule(injectorPath);
 
             _Module.AssemblyReferences.Add(nameReference);
-            var targetType = FindEntryType();
-
-            if (targetType == null) throw new Exception("Couldn't find entry class. Aborting.");
-
-            var targetMethod = targetType.Methods.FirstOrDefault(m => m.IsConstructor && m.IsStatic);
-            if (targetMethod == null)
+            int patched = 0;
+            foreach(var type in FindEntryTypes())
             {
-                throw new Exception("Couldn't find entry method. Aborting.");
+                if(PatchType(type, injector))
+                {
+                    patched++;
+                }
             }
+            
+            if(patched > 0)
+            {
+                _Module.Write(_File.FullName);
+            } else
+            {
+                throw new Exception("Could not find any entry type!");
+            }
+        }
 
-            var injector = ModuleDefinition.ReadModule(injectorPath);
-            var methodReference = _Module.Import(injector.GetType("IllusionInjector.Injector").Methods.First(m => m.Name == "Inject"));
-
-            targetMethod.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Call, methodReference));
-            _Module.Write(_File.FullName);
+        private bool PatchType(TypeDefinition targetType, ModuleDefinition injector)
+        {
+            var targetMethod = targetType.Methods.FirstOrDefault(m => m.IsConstructor && m.IsStatic);
+            if (targetMethod != null)
+            {
+                var methodReference = _Module.Import(injector.GetType("IllusionInjector.Injector").Methods.First(m => m.Name == "Inject"));
+                targetMethod.Body.Instructions.Insert(0, Instruction.Create(OpCodes.Call, methodReference));
+                return true;
+            }
+            return false;
         }
 
 
-        private TypeDefinition FindEntryType()
+        private IEnumerable<TypeDefinition> FindEntryTypes()
         {
-            return _Module.GetTypes().FirstOrDefault(m => m.Name == ENTRY_TYPE);
+            return _Module.GetTypes().Where(m => ENTRY_TYPES.Contains(m.Name));
         }
     }
 }

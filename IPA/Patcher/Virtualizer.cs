@@ -49,17 +49,25 @@ namespace IPA.Patcher
             {
                 VirtualizeType(type);
             }
+
+            _Module.Write(_File.FullName);
         }
 
         private void VirtualizeType(TypeDefinition type)
         {
-            if (type.IsSealed) return;
+            if(type.IsSealed)
+            {
+                // Unseal
+                type.IsSealed = false;
+            }
+
             if (type.IsInterface) return;
             if (type.IsAbstract) return;
 
             // These two don't seem to work.
             if (type.Name == "SceneControl" || type.Name == "ConfigUI") return;
 
+            Console.WriteLine("Virtualizing {0}", type.Name);
             // Take care of sub types
             foreach (var subType in type.NestedTypes)
             {
@@ -97,7 +105,10 @@ namespace IPA.Patcher
         {
             get
             {
-                return _Module.GetTypes().SelectMany(t => t.Methods.Where(m => m.Name == "Awake")).All(m => m.IsVirtual);
+                var awakeMethods = _Module.GetTypes().SelectMany(t => t.Methods.Where(m => m.Name == "Awake"));
+                if (awakeMethods.Count() == 0) return false;
+
+                return ((float)awakeMethods.Count(m => m.IsVirtual) / awakeMethods.Count()) > 0.5f;
             }
         }
     }
