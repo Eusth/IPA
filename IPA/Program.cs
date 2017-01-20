@@ -17,26 +17,27 @@ namespace IPA
             }
 
             string launcherSrc = Path.Combine("IPA", "Launcher.exe");
-            string managedFolder = Path.Combine("IPA", "Managed");
+            string dataSrcPath = Path.Combine("IPA", "Data");
             string pluginsFolder = "Plugins";
             string projectName = Path.GetFileNameWithoutExtension(args[0]);
-            string dataPath = Path.Combine(Path.Combine(Path.GetDirectoryName(args[0]), projectName + "_Data"), "Managed");
-            string engineFile = Path.Combine(dataPath, "UnityEngine.dll");
-            string assemblyFile = Path.Combine(dataPath, "Assembly-Csharp.dll");
+            string dataDstPath = Path.Combine(Path.GetDirectoryName(args[0]), projectName + "_Data");
+            string managedPath = Path.Combine(dataDstPath, "Managed");
+            string engineFile = Path.Combine(managedPath, "UnityEngine.dll");
+            string assemblyFile = Path.Combine(managedPath, "Assembly-Csharp.dll");
 
 
             // Sanitizing
             if (!File.Exists(launcherSrc)) Fail("Couldn't find DLLs! Make sure you extracted all contents of the release archive.");
-            if(!Directory.Exists(dataPath) || !File.Exists(engineFile) || !File.Exists(assemblyFile))
+            if(!Directory.Exists(dataDstPath) || !File.Exists(engineFile) || !File.Exists(assemblyFile))
             {
-                Fail("Game does not seem to be a Unity project. Could not find the libraries to patch.");
+                Fail("Game does not seem to be a Unity project. Could not find the libraries to patch. ");
             } 
 
             try
             {
                 // Copying
                 Console.Write("Updating files... ");
-                CopyAll(new DirectoryInfo(managedFolder), new DirectoryInfo(dataPath));
+                CopyAll(new DirectoryInfo(dataSrcPath), new DirectoryInfo(dataDstPath));
                 Console.WriteLine("Successfully updated files!");
 
                 if (!Directory.Exists(pluginsFolder))

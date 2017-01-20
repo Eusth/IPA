@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace IllusionInjector
@@ -11,7 +12,6 @@ namespace IllusionInjector
             if (!injected)
             {
                 injected = true;
-
                 var bootstrapper = new GameObject("Bootstrapper").AddComponent<Bootstrapper>();
                 bootstrapper.Destroyed += Bootstrapper_Destroyed;
             }

@@ -14,11 +14,6 @@ namespace IllusionInjector
         {
             DontDestroyOnLoad(gameObject);
 
-            if (Environment.CommandLine.Contains("--verbose") && !Screen.fullScreen)
-            {
-                Windows.GuiConsole.CreateConsole();
-            }
-
             plugins = new CompositePlugin(PluginManager.Plugins);
             plugins.OnApplicationStart();
         }
