@@ -8,6 +8,8 @@ Illusion Plugin Architecture (Reloaded)
 3. Drag & drop the game exe onto **IPA.exe**
 4. Start the game as usual
 
+To verify it worked, start the game with the `--verbose` flag. If a new console window opens with debug info, then you're good.
+
 ## How To Uninstall
 
 1. Drag & drop the game exe onto **IPA.exe** while holding <kbd>Alt</kbd>
