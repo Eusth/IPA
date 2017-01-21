@@ -25,3 +25,13 @@ To verify it worked, start the game with the `--verbose` flag. If a new console 
 ## How To Keep The Game Patched
 
 When patching, IPA automatically creates a shortcut that keeps everything up-to-date.
+
+## Arguments
+
+`IPA.exe file-to-patch [arguments]` 
+
+- `--launch`: Launch the game after patching
+- `--revert`: Revert changes made by IPA (= unpatch the game)
+- `--nowait`: Never keep the console open
+
+Unconsumed arguments will be passed on to the game in case of `--launch`.
