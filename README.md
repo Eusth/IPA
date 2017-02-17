@@ -8,6 +8,13 @@ Illusion Plugin Architecture (Reloaded)
 3. Drag & drop the game exe onto **IPA.exe**
 4. Start the game as usual
 
+To verify it worked, start the game with the `--verbose` flag. If a new console window opens with debug info, then you're good.
+
+## How To Uninstall
+
+1. Drag & drop the game exe onto **IPA.exe** while holding <kbd>Alt</kbd>
+2. Done
+
 ## How To Develop
 
 1. Create a new **Class Librar** C# project (.NET 2.0 to 3.5 (for LINQ))
@@ -17,8 +24,14 @@ Illusion Plugin Architecture (Reloaded)
 
 ## How To Keep The Game Patched
 
-If you don't want to drag & drop the game exe onto IPA.exe everytime you replace CSharp-Assembly.dll, do this:
+When patching, IPA automatically creates a shortcut that keeps everything up-to-date.
 
-1. Copy the file **Launcher.exe** from the **IPA** folder into your game folder
-2. Name it like the game exe but append "_Patched" (e.g. **Game.exe** -> **Game_Patched.exe**)
-3. Always start the game with the "_Patched" exe
+## Arguments
+
+`IPA.exe file-to-patch [arguments]` 
+
+- `--launch`: Launch the game after patching
+- `--revert`: Revert changes made by IPA (= unpatch the game)
+- `--nowait`: Never keep the console open
+
+Unconsumed arguments will be passed on to the game in case of `--launch`.
