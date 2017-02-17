@@ -19,8 +19,7 @@ namespace IllusionInjector
 
         private static void Bootstrapper_Destroyed()
         {
-            var singleton = new GameObject("PluginManager");
-            singleton.AddComponent<PluginComponent>(); ;
+            PluginComponent.Create();
         }
     }
 }

@@ -10,6 +10,11 @@ namespace IllusionInjector
         private CompositePlugin plugins;
         private bool freshlyLoaded = false;
 
+        public static PluginComponent Create()
+        {
+            return new GameObject("IPA_PluginManager").AddComponent<PluginComponent>();
+        }
+
         void Awake()
         {
             DontDestroyOnLoad(gameObject);
@@ -46,6 +51,8 @@ namespace IllusionInjector
         void OnDestroy()
         {
             plugins.OnApplicationQuit();
+
+            Create();
         }
 
         void OnLevelWasLoaded(int level)

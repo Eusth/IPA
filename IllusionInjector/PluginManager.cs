@@ -60,7 +60,6 @@ namespace IllusionInjector
                 Console.WriteLine(" {0}: {1}", plugin.Name, plugin.Version);
             }
             Console.WriteLine("-----------------------------");
- 
         }
 
         private static IEnumerable<IPlugin> LoadPluginsFromFile(string file, string exeName)
