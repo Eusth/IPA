@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace IPA
@@ -28,6 +29,7 @@ namespace IPA
         public string ProjectRoot { get; private set; }
         public string IPARoot { get; private set; }
         public string ShortcutPath { get; private set; }
+        public string IPA { get; private set; }
 
         private PatchContext() { }
 
@@ -39,6 +41,7 @@ namespace IPA
             context.Executable = args[0];
             context.ProjectRoot = Path.GetDirectoryName(context.Executable);
             context.IPARoot = Path.Combine(context.ProjectRoot, "IPA");
+            context.IPA = Assembly.GetExecutingAssembly().Location ?? Path.Combine(context.ProjectRoot, "IPA.exe");
             context.LauncherPathSrc = Path.Combine(context.IPARoot, "Launcher.exe");
             context.DataPathSrc = Path.Combine(context.IPARoot, "Data");
             context.PluginsFolder = Path.Combine(context.ProjectRoot, "Plugins");

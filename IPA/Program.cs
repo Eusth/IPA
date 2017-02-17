@@ -92,8 +92,17 @@ namespace IPA
                 // Creating shortcut
                 if(!File.Exists(context.ShortcutPath))
                 {
-                    Console.Write("Creating shortcut... ");
-                    Shortcut.Create(context.ShortcutPath, Assembly.GetExecutingAssembly().Location, Args(context.Executable, "--launch"), context.ProjectRoot, "Launches the game and makes sure it's in a patched state", "", context.Executable);
+                    Console.Write("Creating shortcut to IPA ({0})... ",  context.IPA);
+                    Shortcut.Create(
+                        fileName: context.ShortcutPath, 
+                        targetPath: context.IPA, 
+                        arguments: Args(context.Executable, "--launch"),
+                        workingDirectory: context.ProjectRoot,
+                        description: "Launches the game and makes sure it's in a patched state",
+                        hotkey: "",
+                        iconPath: context.Executable
+                    );
+                    
                     Console.WriteLine("Created");
                 }
             }
