@@ -13,7 +13,7 @@ using System.Windows.Forms;
 namespace IPA
 {
   
-    class Program
+    public class Program
     {
 
         static void Main(string[] args)
@@ -59,8 +59,11 @@ namespace IPA
             try
             {
                 // Copying
-                Console.Write("Updating files... ");
-                CopyAll(new DirectoryInfo(context.DataPathSrc), new DirectoryInfo(context.DataPathDst));
+                Console.WriteLine("Updating files... ");
+                var nativePluginFolder = Path.Combine(context.DataPathDst, "Plugins");
+                bool isFlat = Directory.Exists(nativePluginFolder) && Directory.GetFiles(nativePluginFolder).Any(f => f.EndsWith(".dll"));
+                CopyAll(new DirectoryInfo(context.DataPathSrc), new DirectoryInfo(context.DataPathDst), (from, to) => NativePluginInterceptor(from, to, new DirectoryInfo(nativePluginFolder), isFlat) );
+
                 Console.WriteLine("Successfully updated files!");
 
                 if (!Directory.Exists(context.PluginsFolder))
@@ -165,18 +168,65 @@ namespace IPA
             }
         }
 
-        public static void CopyAll(DirectoryInfo source, DirectoryInfo target)
+        public static IEnumerable<FileInfo> NativePluginInterceptor(FileInfo from, FileInfo to, DirectoryInfo nativePluginFolder, bool isFlat)
         {
+            if (to.FullName.StartsWith(nativePluginFolder.FullName))
+            {
+                var relevantBit = to.FullName.Substring(nativePluginFolder.FullName.Length + 1);
+                // Goes into the plugin folder!
+                bool isFileFlat = !relevantBit.StartsWith("x86");
+                if (isFlat && !isFileFlat)
+                {
+                    // Flatten structure
+                    if (relevantBit.StartsWith("x86_64"))
+                    {
+                        yield return new FileInfo(Path.Combine(nativePluginFolder.FullName, relevantBit.Substring("x86_64".Length + 1)));
+                    }
+                    else
+                    {
+                        // Throw away
+                        yield break;
+                    }
+                }
+                else if (!isFlat && isFileFlat)
+                {
+                    // Deepen structure
+                    yield return new FileInfo(Path.Combine(Path.Combine(nativePluginFolder.FullName, "x86"), relevantBit));
+                    yield return new FileInfo(Path.Combine(Path.Combine(nativePluginFolder.FullName, "x86_64"), relevantBit));
+                }
+                else
+                {
+                    yield return to;
+                }
+            }
+            else
+            {
+                yield return to;
+            }
+        }
+        private static IEnumerable<FileInfo> PassThroughInterceptor(FileInfo from, FileInfo to)
+        {
+            yield return to;
+        }
+
+        public static void CopyAll(DirectoryInfo source, DirectoryInfo target, Func<FileInfo, FileInfo, IEnumerable<FileInfo>> interceptor = null)
+        {
+            if(interceptor == null)
+            {
+                interceptor = PassThroughInterceptor;
+            }
+
             Directory.CreateDirectory(target.FullName);
 
             // Copy each file into the new directory.
             foreach (FileInfo fi in source.GetFiles())
             {
-                string targetFile = Path.Combine(target.FullName, fi.Name);
-                if (!File.Exists(targetFile) || File.GetLastWriteTimeUtc(targetFile) < fi.LastWriteTimeUtc)
-                {
-                    Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
-                    fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+                foreach(var targetFile in interceptor(fi, new FileInfo(Path.Combine(target.FullName, fi.Name)))) {
+                    if (!targetFile.Exists || targetFile.LastWriteTimeUtc < fi.LastWriteTimeUtc)
+                    {
+                        Console.WriteLine(@"Copying {0}", targetFile.FullName);
+                        fi.CopyTo(targetFile.FullName, true);
+                    }
                 }
             }
 
@@ -185,7 +235,7 @@ namespace IPA
             {
                 DirectoryInfo nextTargetSubDir =
                     target.CreateSubdirectory(diSourceSubDir.Name);
-                CopyAll(diSourceSubDir, nextTargetSubDir);
+                CopyAll(diSourceSubDir, nextTargetSubDir, interceptor);
             }
         }
 
