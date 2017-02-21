@@ -58,11 +58,14 @@ namespace IPA
         {
             try
             {
+                var backup = new BackupUnit(context);
+
                 // Copying
                 Console.WriteLine("Updating files... ");
                 var nativePluginFolder = Path.Combine(context.DataPathDst, "Plugins");
                 bool isFlat = Directory.Exists(nativePluginFolder) && Directory.GetFiles(nativePluginFolder).Any(f => f.EndsWith(".dll"));
-                CopyAll(new DirectoryInfo(context.DataPathSrc), new DirectoryInfo(context.DataPathDst), (from, to) => NativePluginInterceptor(from, to, new DirectoryInfo(nativePluginFolder), isFlat) );
+                bool force = !BackupManager.HasBackup(context) || context.Args.Contains("-f") || context.Args.Contains("--force");
+                CopyAll(new DirectoryInfo(context.DataPathSrc), new DirectoryInfo(context.DataPathDst), force, backup, (from, to) => NativePluginInterceptor(from, to, new DirectoryInfo(nativePluginFolder), isFlat) );
 
                 Console.WriteLine("Successfully updated files!");
 
@@ -77,7 +80,7 @@ namespace IPA
                 if (!patchedModule.IsPatched)
                 {
                     Console.Write("Patching UnityEngine.dll... ");
-                    BackupManager.MakeBackup(context.EngineFile);
+                    backup.Add(context.EngineFile);
                     patchedModule.Patch();
                     Console.WriteLine("Done!");
                 }
@@ -87,7 +90,7 @@ namespace IPA
                 if (!virtualizedModule.IsVirtualized)
                 {
                     Console.Write("Virtualizing Assembly-Csharp.dll... ");
-                    BackupManager.MakeBackup(context.AssemblyFile);
+                    backup.Add(context.AssemblyFile);
                     virtualizedModule.Virtualize();
                     Console.WriteLine("Done!");
                 }
@@ -120,8 +123,8 @@ namespace IPA
 
         private static void Revert(PatchContext context)
         {
-            Console.Write("Restoring game assembly... ");
-            if(BackupManager.Restore(context.AssemblyFile))
+            Console.Write("Restoring backup... ");
+            if(BackupManager.Restore(context))
             {
                 Console.WriteLine("Done!");
             } else
@@ -129,16 +132,7 @@ namespace IPA
                 Console.WriteLine("Already vanilla!");
             }
 
-            Console.Write("Restoring unity engine... ");
-            if(BackupManager.Restore(context.EngineFile))
-            {
-                Console.WriteLine("Done!");
-            }
-            else
-            {
-                Console.WriteLine("Already vanilla!");
-            }
-
+           
             if (File.Exists(context.ShortcutPath))
             {
                 Console.WriteLine("Deleting shortcut...");
@@ -209,22 +203,23 @@ namespace IPA
             yield return to;
         }
 
-        public static void CopyAll(DirectoryInfo source, DirectoryInfo target, Func<FileInfo, FileInfo, IEnumerable<FileInfo>> interceptor = null)
+        public static void CopyAll(DirectoryInfo source, DirectoryInfo target, bool aggressive, BackupUnit backup, Func<FileInfo, FileInfo, IEnumerable<FileInfo>> interceptor = null)
         {
             if(interceptor == null)
             {
                 interceptor = PassThroughInterceptor;
             }
 
-            Directory.CreateDirectory(target.FullName);
-
             // Copy each file into the new directory.
             foreach (FileInfo fi in source.GetFiles())
             {
                 foreach(var targetFile in interceptor(fi, new FileInfo(Path.Combine(target.FullName, fi.Name)))) {
-                    if (!targetFile.Exists || targetFile.LastWriteTimeUtc < fi.LastWriteTimeUtc)
+                    if (!targetFile.Exists || targetFile.LastWriteTimeUtc < fi.LastWriteTimeUtc || aggressive)
                     {
+                        targetFile.Directory.Create();
+
                         Console.WriteLine(@"Copying {0}", targetFile.FullName);
+                        backup.Add(targetFile);
                         fi.CopyTo(targetFile.FullName, true);
                     }
                 }
@@ -233,9 +228,8 @@ namespace IPA
             // Copy each subdirectory using recursion.
             foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
             {
-                DirectoryInfo nextTargetSubDir =
-                    target.CreateSubdirectory(diSourceSubDir.Name);
-                CopyAll(diSourceSubDir, nextTargetSubDir, interceptor);
+                DirectoryInfo nextTargetSubDir = new DirectoryInfo(Path.Combine(target.FullName, diSourceSubDir.Name));
+                CopyAll(diSourceSubDir, nextTargetSubDir, aggressive, backup, interceptor);
             }
         }
 

@@ -30,6 +30,7 @@ namespace IPA
         public string IPARoot { get; private set; }
         public string ShortcutPath { get; private set; }
         public string IPA { get; private set; }
+        public string BackupPath { get; private set; }
 
         private PatchContext() { }
 
@@ -39,7 +40,7 @@ namespace IPA
             
             context.Args = args;
             context.Executable = args[0];
-            context.ProjectRoot = Path.GetDirectoryName(context.Executable);
+            context.ProjectRoot = new FileInfo(context.Executable).Directory.FullName;
             context.IPARoot = Path.Combine(context.ProjectRoot, "IPA");
             context.IPA = Assembly.GetExecutingAssembly().Location ?? Path.Combine(context.ProjectRoot, "IPA.exe");
             context.LauncherPathSrc = Path.Combine(context.IPARoot, "Launcher.exe");
@@ -50,9 +51,11 @@ namespace IPA
             context.ManagedPath = Path.Combine(context.DataPathDst, "Managed");
             context.EngineFile = Path.Combine(context.ManagedPath, "UnityEngine.dll");
             context.AssemblyFile = Path.Combine(context.ManagedPath, "Assembly-Csharp.dll");
-
+            context.BackupPath = Path.Combine(Path.Combine(context.IPARoot, "Backups"), context.ProjectName);
             string shortcutName = string.Format("{0} (Patch & Launch)", context.ProjectName);
             context.ShortcutPath = Path.Combine(context.ProjectRoot, shortcutName) + ".lnk";
+
+            Directory.CreateDirectory(context.BackupPath);
 
             return context;
         }

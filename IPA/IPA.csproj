@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="PatchContext.cs" />
     <Compile Include="Patcher\BackupManager.cs" />
+    <Compile Include="Patcher\BackupUnit.cs" />
     <Compile Include="Patcher\Patcher.cs" />
     <Compile Include="Patcher\Virtualizer.cs" />
     <Compile Include="Program.cs" />
