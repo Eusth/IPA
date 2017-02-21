@@ -51,6 +51,7 @@ namespace IllusionInjector
             
 
             // DEBUG
+            Console.WriteLine("Running on Unity {0}", UnityEngine.Application.unityVersion);
             Console.WriteLine("-----------------------------");
             Console.WriteLine("Loading plugins from {0} and found {1}", pluginDirectory, _Plugins.Count);
             Console.WriteLine("-----------------------------");
@@ -91,15 +92,17 @@ namespace IllusionInjector
                             if(filter == null || Enumerable.Contains(filter, exeName, StringComparer.OrdinalIgnoreCase))
                                 plugins.Add(pluginInstance);
                         }
-                        catch (Exception)
+                        catch (Exception e)
                         {
+                            Console.WriteLine("[WARN] Could not load plugin {0} in {1}! {2}", t.FullName, Path.GetFileName(file), e);
                         }
                     }
                 }
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine("[ERROR] Could not load {0}! {1}", Path.GetFileName(file), e);
             }
 
             return plugins;
