@@ -6,8 +6,9 @@ Illusion Plugin Architecture (Reloaded)
 1. Download a release (https://github.com/Eusth/IPA/releases)
 2. Extract the contents into the game folder
 3. Drag & drop the game exe onto **IPA.exe**
-4. Start the game as usual
+4. Start the game as usual (the generated shortcut is optional)
 
+**Optional:** 
 To verify it worked, start the game with the `--verbose` flag. If a new console window opens with debug info, then you're good.
 
 ## How To Uninstall
@@ -24,7 +25,7 @@ To verify it worked, start the game with the `--verbose` flag. If a new console 
 
 ## How To Keep The Game Patched
 
-When patching, IPA automatically creates a shortcut that keeps everything up-to-date.
+When patching, IPA automatically creates a shortcut that keeps everything up-to-date. This simply makes sure that your DLLs remain patched even after an update.
 
 ## Arguments
 
