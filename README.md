@@ -1,5 +1,5 @@
 # IPA
-Illusion Plugin Architecture (Reloaded)
+Illusion Plugin Architecture (Reloaded) - let's you inject code into Unity projects.
 
 ## How To Install
 
@@ -18,7 +18,7 @@ To verify it worked, start the game with the `--verbose` flag. If a new console 
 
 ## How To Develop
 
-1. Create a new **Class Librar** C# project (.NET 2.0 to 3.5 (for LINQ))
+1. Create a new **Class Library** C# project (.NET 2.0 to 3.5 (for LINQ))
 2. Download a release and add **IllusionPlugin.dll** to your references
 3. Implement `IPlugin` or `IEnhancedPlugin`
 4. Build the project and copy the DLL into the Plugins folder of the game
