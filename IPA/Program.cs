@@ -48,7 +48,7 @@ namespace IPA
         private static void Validate(PatchContext c)
         {
             if (!File.Exists(c.LauncherPathSrc)) Fail("Couldn't find DLLs! Make sure you extracted all contents of the release archive.");
-            if (!Directory.Exists(c.DataPathDst) || !File.Exists(c.EngineFile) || !File.Exists(c.AssemblyFile))
+            if (!Directory.Exists(c.DataPathDst) || !File.Exists(c.EngineFile))
             {
                 Fail("Game does not seem to be a Unity project. Could not find the libraries to patch.");
             }
@@ -86,13 +86,16 @@ namespace IPA
                 }
 
                 // Virtualizing
-                var virtualizedModule = VirtualizedModule.Load(context.AssemblyFile);
-                if (!virtualizedModule.IsVirtualized)
+                if (File.Exists(context.AssemblyFile))
                 {
-                    Console.Write("Virtualizing Assembly-Csharp.dll... ");
-                    backup.Add(context.AssemblyFile);
-                    virtualizedModule.Virtualize();
-                    Console.WriteLine("Done!");
+                    var virtualizedModule = VirtualizedModule.Load(context.AssemblyFile);
+                    if (!virtualizedModule.IsVirtualized)
+                    {
+                        Console.Write("Virtualizing Assembly-Csharp.dll... ");
+                        backup.Add(context.AssemblyFile);
+                        virtualizedModule.Virtualize();
+                        Console.WriteLine("Done!");
+                    }
                 }
 
                 // Creating shortcut

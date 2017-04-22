@@ -9,6 +9,7 @@ namespace IllusionInjector
     {
         private CompositePlugin plugins;
         private bool freshlyLoaded = false;
+        private bool quitting = false;
 
         public static PluginComponent Create()
         {
@@ -50,9 +51,17 @@ namespace IllusionInjector
 
         void OnDestroy()
         {
+            if (!quitting)
+            {
+                Create();
+            }
+        }
+        
+        void OnApplicationQuit()
+        {
             plugins.OnApplicationQuit();
 
-            Create();
+            quitting = true;
         }
 
         void OnLevelWasLoaded(int level)
