@@ -15,6 +15,11 @@ namespace IPA
   
     public class Program
     {
+        public enum Architecture {
+            x86,
+            x64,
+            Unknown
+        }
 
         static void Main(string[] args)
         {
@@ -65,7 +70,12 @@ namespace IPA
                 var nativePluginFolder = Path.Combine(context.DataPathDst, "Plugins");
                 bool isFlat = Directory.Exists(nativePluginFolder) && Directory.GetFiles(nativePluginFolder).Any(f => f.EndsWith(".dll"));
                 bool force = !BackupManager.HasBackup(context) || context.Args.Contains("-f") || context.Args.Contains("--force");
-                CopyAll(new DirectoryInfo(context.DataPathSrc), new DirectoryInfo(context.DataPathDst), force, backup, (from, to) => NativePluginInterceptor(from, to, new DirectoryInfo(nativePluginFolder), isFlat) );
+                var architecture = DetectArchitecture(context.Executable);
+
+                Console.WriteLine("Architecture: {0}", architecture);
+
+                CopyAll(new DirectoryInfo(context.DataPathSrc), new DirectoryInfo(context.DataPathDst), force, backup, 
+                    (from, to) => NativePluginInterceptor(from, to, new DirectoryInfo(nativePluginFolder), isFlat, architecture) );
 
                 Console.WriteLine("Successfully updated files!");
 
@@ -102,17 +112,22 @@ namespace IPA
                 if(!File.Exists(context.ShortcutPath))
                 {
                     Console.Write("Creating shortcut to IPA ({0})... ",  context.IPA);
-                    Shortcut.Create(
-                        fileName: context.ShortcutPath, 
-                        targetPath: context.IPA, 
-                        arguments: Args(context.Executable, "--launch"),
-                        workingDirectory: context.ProjectRoot,
-                        description: "Launches the game and makes sure it's in a patched state",
-                        hotkey: "",
-                        iconPath: context.Executable
-                    );
-                    
-                    Console.WriteLine("Created");
+                    try
+                    {
+                        Shortcut.Create(
+                            fileName: context.ShortcutPath,
+                            targetPath: context.IPA,
+                            arguments: Args(context.Executable, "--launch"),
+                            workingDirectory: context.ProjectRoot,
+                            description: "Launches the game and makes sure it's in a patched state",
+                            hotkey: "",
+                            iconPath: context.Executable
+                        );
+                        Console.WriteLine("Created");
+                    } catch (Exception e)
+                    {
+                        Console.Error.WriteLine("Failed to create shortcut, but game was patched!");
+                    }
                 }
             }
             catch (Exception e)
@@ -120,7 +135,10 @@ namespace IPA
                 Fail("Oops! This should not have happened.\n\n" + e);
             }
 
+
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Finished!");
+            Console.ResetColor();
 
         }
 
@@ -165,7 +183,7 @@ namespace IPA
             }
         }
 
-        public static IEnumerable<FileInfo> NativePluginInterceptor(FileInfo from, FileInfo to, DirectoryInfo nativePluginFolder, bool isFlat)
+        public static IEnumerable<FileInfo> NativePluginInterceptor(FileInfo from, FileInfo to, DirectoryInfo nativePluginFolder, bool isFlat, Architecture preferredArchitecture)
         {
             if (to.FullName.StartsWith(nativePluginFolder.FullName))
             {
@@ -175,12 +193,17 @@ namespace IPA
                 if (isFlat && !isFileFlat)
                 {
                     // Flatten structure
-                    if (relevantBit.StartsWith("x86_64"))
+                    bool is64Bit = relevantBit.StartsWith("x86_64");
+                    if (!is64Bit && preferredArchitecture == Architecture.x86)
                     {
-                        yield return new FileInfo(Path.Combine(nativePluginFolder.FullName, relevantBit.Substring("x86_64".Length + 1)));
+                        // 32 bit
+                        yield return new FileInfo(Path.Combine(nativePluginFolder.FullName, relevantBit.Substring("x86".Length + 1)));
                     }
-                    else
+                    else if(is64Bit && (preferredArchitecture == Architecture.x64 || preferredArchitecture == Architecture.Unknown))
                     {
+                        // 64 bit
+                        yield return new FileInfo(Path.Combine(nativePluginFolder.FullName, relevantBit.Substring("x86_64".Length + 1)));
+                    } else {
                         // Throw away
                         yield break;
                     }
@@ -268,6 +291,34 @@ namespace IPA
             return value;
         }
 
+        public static Architecture DetectArchitecture(string assembly)
+        {
+            using (var reader = new BinaryReader(File.OpenRead(assembly)))
+            {
+                var header = reader.ReadUInt16();
+                if(header == 0x5a4d)
+                {
+                    reader.BaseStream.Seek(60, SeekOrigin.Begin); // this location contains the offset for the PE header
+                    var peOffset = reader.ReadUInt32();
+
+                    reader.BaseStream.Seek(peOffset + 4, SeekOrigin.Begin);
+                    var machine = reader.ReadUInt16();
+
+                    if (machine == 0x8664) // IMAGE_FILE_MACHINE_AMD64
+                        return Architecture.x64;
+                    else if (machine == 0x014c) // IMAGE_FILE_MACHINE_I386
+                        return Architecture.x86;
+                    else if (machine == 0x0200) // IMAGE_FILE_MACHINE_IA64
+                        return Architecture.x64;
+                    else
+                        return Architecture.Unknown;
+                } else
+                {
+                    // Not a supported binary
+                    return Architecture.Unknown;
+                }
+            }
+        }
 
         public abstract class Keyboard
         {
