@@ -49,7 +49,7 @@ namespace IPA
             context.ProjectName = Path.GetFileNameWithoutExtension(context.Executable);
             context.DataPathDst = Path.Combine(context.ProjectRoot, context.ProjectName + "_Data");
             context.ManagedPath = Path.Combine(context.DataPathDst, "Managed");
-            context.EngineFile = Path.Combine(context.ManagedPath, (File.Exists(Path.Combine(context.ManagedPath, "UnityEngine.CoreModule.dll")) ? "UnityEngine.CoreModule.dll" : "UnityEngine.dll"));
+            context.EngineFile =  DetermineEngineFile(context.ManagedPath, "UnityEngine.dll", "UnityEngine.CoreModule.dll");
             context.AssemblyFile = Path.Combine(context.ManagedPath, "Assembly-Csharp.dll");
             context.BackupPath = Path.Combine(Path.Combine(context.IPARoot, "Backups"), context.ProjectName);
             string shortcutName = string.Format("{0} (Patch & Launch)", context.ProjectName);
@@ -58,6 +58,20 @@ namespace IPA
             Directory.CreateDirectory(context.BackupPath);
 
             return context;
+        }
+
+        private static string DetermineEngineFile(string basePath, params string[] candidates)
+        {
+            foreach(var candidate in candidates)
+            {
+                var fullPath = Path.Combine(basePath, candidate);
+                if(File.Exists(fullPath))
+                {
+                    return fullPath;
+                }
+            }
+
+            throw new FileNotFoundException("Could not find engine DLL!");
         }
     }
 }
