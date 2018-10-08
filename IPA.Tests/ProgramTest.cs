@@ -30,7 +30,7 @@ namespace IPA.Tests
 
         public void CopiesCorrectly(string from, string to, string nativeFolder, bool isFlat, string[] expected)
         {
-            var outcome = Program.NativePluginInterceptor(new FileInfo(from), new FileInfo(to), new DirectoryInfo(nativeFolder), isFlat).Select(f => f.FullName).ToList();
+            var outcome = Program.NativePluginInterceptor(new FileInfo(from), new FileInfo(to), new DirectoryInfo(nativeFolder), isFlat, Program.Architecture.Unknown).Select(f => f.FullName).ToList();
 
             var expectedPaths = expected.Select(e => new FileInfo(e)).Select(f => f.FullName).ToList();
             Assert.Equal(expectedPaths, outcome);
