@@ -52,8 +52,7 @@ namespace IPA
             context.EngineFile =  DetermineEngineFile(context.ManagedPath, "UnityEngine.dll", "UnityEngine.CoreModule.dll");
             context.AssemblyFile = Path.Combine(context.ManagedPath, "Assembly-Csharp.dll");
             context.BackupPath = Path.Combine(Path.Combine(context.IPARoot, "Backups"), context.ProjectName);
-            string shortcutName = string.Format("{0} (Patch & Launch)", context.ProjectName);
-            context.ShortcutPath = Path.Combine(context.ProjectRoot, shortcutName) + ".lnk";
+            context.ShortcutPath = Path.Combine(context.ProjectRoot, $"{context.ProjectName} (Patch & Launch)") + ".lnk";
 
             Directory.CreateDirectory(context.BackupPath);
 
